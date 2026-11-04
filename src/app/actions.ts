@@ -2,7 +2,9 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { revalidatePath } from "next/cache";
+import { API_URL, ENDPOINTS } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 export type EstadoLogin = { error: string } | null;
 
@@ -35,4 +37,26 @@ export async function login(_estadoPrevio: EstadoLogin, formData: FormData): Pro
 export async function logout() {
   (await cookies()).delete("token");
   redirect("/login");
+}
+
+async function llamar(path: string, opciones: RequestInit = {}) {
+  const token = await getToken();
+  return fetch(`${API_URL}${path}`, {
+    ...opciones,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Token ${token}` } : {}),
+    },
+    cache: "no-store",
+  }).catch(() => null);
+}
+
+export async function borrarProducto(id: number): Promise<{ error?: string }> {
+  const res = await llamar(`${ENDPOINTS.productos}${id}/`, { method: "DELETE" });
+  if (!res) return { error: "Sin conexión con la API." };
+  if (res.status === 401 || res.status === 403) return { error: "Tu sesión venció. Volvé a iniciar sesión." };
+  if (!res.ok && res.status !== 404) return { error: "No se pudo borrar el producto." };
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+  return {};
 }
