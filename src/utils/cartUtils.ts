@@ -1,14 +1,15 @@
-export interface CartItem {
+export interface CartItemType {
   id: number;
   nombre: string;
   precio: number;
   cantidad: number;
+  imagen?: string;
 }
 
 /**
  * Calcula el precio total del carrito sumando el precio por la cantidad de cada ítem.
  */
-export function calcularTotalCarrito(items: CartItem[]): number {
+export function calcularTotalCarrito(items: CartItemType[]): number {
   return items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 }
 

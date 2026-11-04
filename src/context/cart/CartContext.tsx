@@ -2,17 +2,14 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export interface CartItem {
-  id: number;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  imagen?: string;
-}
+import { calcularTotalCarrito, type CartItemType } from "@/utils/cartUtils";
+
+// Re-exportamos el tipo para que los componentes puedan importarlo desde el contexto
+export type { CartItemType };
 
 interface CartContextType {
-  cart: CartItem[];
-  addToCart: (product: CartItem) => void;
+  cart: CartItemType[];
+  addToCart: (product: CartItemType) => void;
   removeFromCart: (id: number) => void;
   clearCart: () => void;
   totalPrice: number;
@@ -22,9 +19,9 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItemType[]>([]);
 
-  const addToCart = (product: CartItem) => {
+  const addToCart = (product: CartItemType) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -46,10 +43,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart([]);
   };
 
-  const totalPrice = cart.reduce(
-    (acc, item) => acc + item.precio * item.cantidad,
-    0
-  );
+  const totalPrice = calcularTotalCarrito(cart);
 
   // Función de envío preparada para integrar el token de autenticación de Ignacio
   const enviarPedido = async (datosCliente: any) => {

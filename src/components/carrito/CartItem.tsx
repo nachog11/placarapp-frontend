@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-// Ruta actualizada al nuevo directorio de context
-import { useCart, CartItemType } from "../../context/cart/CartContext";
+import { useCart } from "@/context/cart/CartContext";
+import type { CartItemType } from "@/utils/cartUtils";
 
 interface CartItemProps {
   item: CartItemType;
