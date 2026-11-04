@@ -5,7 +5,7 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ subtotal }: OrderSummaryProps) {
-  const envio = 0; // Podés ajustar lógica de envío si hace falta
+  const envio: number = 0; 
   const total = subtotal + envio;
 
   return (
