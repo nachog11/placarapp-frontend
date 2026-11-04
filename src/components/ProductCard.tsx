@@ -1,4 +1,6 @@
 import Link from "next/link";
+import ProductImage from "@/components/ProductImage";
+import { extraerImagen } from "@/lib/imagen";
 import type { ProductoLista } from "@/lib/types";
 
 export function formatearPrecio(valor: string) {
@@ -10,14 +12,18 @@ export function formatearPrecio(valor: string) {
 }
 
 export default function ProductCard({ producto }: { producto: ProductoLista }) {
+  const { imagen } = extraerImagen(producto.descripcion);
+
   return (
     <Link
       href={`/productos/${producto.id}`}
       className="group flex flex-col items-center text-center"
     >
-      <div className="grid aspect-square w-full max-w-56 place-items-center rounded-full bg-arena text-7xl font-light text-madera transition group-hover:bg-madera/25">
-        {producto.nombre.charAt(0).toUpperCase()}
-      </div>
+      <ProductImage
+        imagen={imagen}
+        nombre={producto.nombre}
+        className="aspect-square w-full max-w-56 text-7xl transition group-hover:bg-madera/25"
+      />
 
       <h3 className="mt-4 text-lg text-tinta">{producto.nombre}</h3>
       {producto.categoria && (
