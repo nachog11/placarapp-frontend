@@ -1,38 +1,89 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { API_URL, ENDPOINTS } from "@/lib/api";
+import { getToken, removeToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 
-export type EstadoLogin = { error: string } | null;
+export type ResultadoProducto = {
+  ok?: boolean;
+  error?: string;
+  errores?: Record<string, string[]>;
+  success?: boolean;
+};
 
-export async function login(_estadoPrevio: EstadoLogin, formData: FormData): Promise<EstadoLogin> {
+export async function login(prevState: unknown, formData: FormData) {
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+
   const res = await fetch(`${API_URL}/api/token/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: formData.get("username"),
-      password: formData.get("password"),
-    }),
-    cache: "no-store",
-  }).catch(() => null);
-
-  if (!res) return { error: "No se pudo conectar con la API." };
-  if (res.status === 400 || res.status === 401) return { error: "Usuario o contraseña incorrectos." };
-  if (!res.ok) return { error: "La API respondió con un error. Intenta de nuevo." };
-
-  const { token } = await res.json();
-  (await cookies()).set("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 2,
+    body: JSON.stringify({ username, password }),
   });
+
+  if (!res.ok) {
+    return { error: "Credenciales inválidas" };
+  }
+
+  const data = await res.json();
+  const cookieStore = await cookies();
+  cookieStore.set("token", data.token, { httpOnly: true, path: "/" });
+
   redirect("/dashboard");
 }
 
 export async function logout() {
-  (await cookies()).delete("token");
+  await removeToken();
   redirect("/login");
+}
+
+export async function crearProducto(valores: {
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+  precio: string;
+  stock: string;
+  categoria: string;
+  materiales: string[];
+  destacado: boolean;
+  activo: boolean;
+}): Promise<ResultadoProducto> {
+  const token = await getToken();
+  const res = await fetch(`${API_URL}${ENDPOINTS.productos}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
+    },
+    body: JSON.stringify(valores),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { error: "Error al crear el producto", errores: data };
+  }
+
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+  return { ok: true, success: true };
+}
+
+export async function borrarProducto(id: number): Promise<ResultadoProducto> {
+  const token = await getToken();
+  const res = await fetch(`${API_URL}${ENDPOINTS.productos}${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Token ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    return { error: "Error al borrar el producto" };
+  }
+
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+  return { ok: true, success: true };
 }

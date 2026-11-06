@@ -4,9 +4,14 @@ import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
 import { getCategorias, getProductos } from "@/lib/api";
 
-type Filtros = { search?: string; categoria?: string; ordering?: string };
+type Filtros = { 
+  search?: string; 
+  categoria?: string; 
+  ordering?: string; 
+  activo?: string | boolean; 
+};
 
-async function Filtros() {
+async function FiltrosComponent() {
   const categorias = await getCategorias();
   return <ProductFilters categorias={categorias} />;
 }
@@ -29,7 +34,7 @@ async function Contenido({ filtros }: { filtros: Filtros }) {
 
   return (
     <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
-      {productos.map((producto) => (
+      {productos.map((producto: any) => (
         <ProductCard key={producto.id} producto={producto} />
       ))}
     </div>
@@ -50,7 +55,7 @@ export default async function ProductosPage({
 
       <div className="mt-8">
         <Suspense fallback={<div className="h-10" />}>
-          <Filtros />
+          <FiltrosComponent />
         </Suspense>
       </div>
 
