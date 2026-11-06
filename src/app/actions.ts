@@ -1,7 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { API_URL } from "@/lib/api";
+import { revalidatePath } from "next/cache";
+import { API_URL, ENDPOINTS } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import { productoSchema, type ProductoFormValues } from "@/lib/schemas";
+import { unirImagen } from "@/lib/imagen";
 
 export type EstadoLogin =
   | { error: string }
@@ -55,81 +59,123 @@ export async function logout() {
   (await cookies()).delete("token");
 }
 
-import { revalidatePath } from "next/cache";
-import { ENDPOINTS } from "@/lib/api";
+async function llamar(
+  path: string,
+  opciones: RequestInit = {}
+) {
+  const token = await getToken();
 
-export type ResultadoProducto = {
-  ok?: boolean;
-  error?: string;
-  errores?: Record<string, string[]>;
-  success?: boolean;
-};
-
-export async function crearProducto(valores: {
-  nombre: string;
-  descripcion: string;
-  imagen: string;
-  precio: string;
-  stock: string;
-  categoria: string;
-  materiales: string[];
-  destacado: boolean;
-  activo: boolean;
-}): Promise<ResultadoProducto> {
-  const token = (await cookies()).get("token")?.value;
-
-  if (!token) {
-    return { error: "Tu sesión venció. Volvé a iniciar sesión." };
-  }
-
-  const res = await fetch(`${API_URL}${ENDPOINTS.productos}`, {
-    method: "POST",
+  return fetch(`${API_URL}${path}`, {
+    ...opciones,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Token ${token}`,
+      ...(token ? { Authorization: `Token ${token}` } : {}),
     },
-    body: JSON.stringify(valores),
     cache: "no-store",
   }).catch(() => null);
-
-  if (!res) return { error: "No se pudo conectar con la API." };
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    return { error: "Error al crear el producto", errores: data };
-  }
-
-  revalidatePath("/dashboard/productos");
-  revalidatePath("/productos");
-
-  return { ok: true, success: true };
 }
+
+export type ResultadoProducto = {
+  ok?: true;
+  error?: string;
+  errores?: Record<string, string[]>;
+};
 
 export async function borrarProducto(
   id: number
 ): Promise<ResultadoProducto> {
-  const token = (await cookies()).get("token")?.value;
+  const res = await llamar(
+    `${ENDPOINTS.productos}${id}/`,
+    { method: "DELETE" }
+  );
 
-  if (!token) {
+  if (!res) {
+    return { error: "Sin conexión con la API." };
+  }
+
+  if (res.status === 401 || res.status === 403) {
     return { error: "Tu sesión venció. Volvé a iniciar sesión." };
   }
 
-  const res = await fetch(`${API_URL}${ENDPOINTS.productos}${id}/`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Token ${token}`,
-    },
-    cache: "no-store",
-  }).catch(() => null);
-
-  if (!res) return { error: "No se pudo conectar con la API." };
-
-  if (!res.ok) {
-    return { error: "Error al borrar el producto." };
+  if (!res.ok && res.status !== 404) {
+    return { error: "No se pudo borrar el producto." };
   }
 
   revalidatePath("/dashboard/productos");
   revalidatePath("/productos");
 
-  return { ok: true, success: true };
+  return {};
+}
+
+async function enviarProducto(
+  path: string,
+  method: "POST" | "PUT",
+  valores: ProductoFormValues
+): Promise<ResultadoProducto> {
+  const parsed = productoSchema.safeParse(valores);
+
+  if (!parsed.success) {
+    return { error: "Los datos del formulario no son válidos." };
+  }
+
+  const v = parsed.data;
+
+  const res = await llamar(path, {
+    method,
+    body: JSON.stringify({
+      nombre: v.nombre,
+      descripcion: unirImagen(v.descripcion, v.imagen),
+      precio: v.precio,
+      stock: Number(v.stock),
+      categoria: Number(v.categoria),
+      materiales: v.materiales.map(Number),
+      destacado: v.destacado,
+      activo: v.activo,
+    }),
+  });
+
+  if (!res) {
+    return { error: "No se pudo conectar con la API." };
+  }
+
+  if (res.status === 401 || res.status === 403) {
+    return {
+      error: "Tu sesión venció. Volvé a iniciar sesión.",
+    };
+  }
+
+  if (res.status === 400) {
+    const errores = await res.json().catch(() => null);
+
+    return {
+      error: "La API rechazó algunos datos.",
+      errores: errores ?? undefined,
+    };
+  }
+
+  if (!res.ok) {
+    return { error: "No se pudo guardar el producto." };
+  }
+
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+
+  return { ok: true };
+}
+
+export async function crearProducto(
+  valores: ProductoFormValues
+): Promise<ResultadoProducto> {
+  return enviarProducto(ENDPOINTS.productos, "POST", valores);
+}
+
+export async function editarProducto(
+  id: number,
+  valores: ProductoFormValues
+): Promise<ResultadoProducto> {
+  return enviarProducto(
+    `${ENDPOINTS.productos}${id}/`,
+    "PUT",
+    valores
+  );
 }

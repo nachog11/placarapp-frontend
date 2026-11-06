@@ -1,5 +1,10 @@
 import { getToken } from "@/lib/auth";
-import type { Categoria, Material, ProductoLista } from "@/lib/types";
+import type {
+  Categoria,
+  Material,
+  ProductoDetalle,
+  ProductoLista,
+} from "@/lib/types";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -62,13 +67,26 @@ export async function getProductos(params?: {
   );
 }
 
-export async function getProducto(id: string) {
+export async function getProducto(
+  id: string
+): Promise<ProductoDetalle | null> {
+  const token = await getToken();
+  const headers: HeadersInit = token
+    ? { Authorization: `Token ${token}` }
+    : {};
+
   const res = await fetch(
     `${API_URL}${ENDPOINTS.productos}${id}/`,
-    { cache: "no-store" }
+    { headers, cache: "no-store" }
   );
 
-  if (!res.ok) return null;
+  if (res.status === 404) return null;
+
+  if (!res.ok) {
+    throw new Error(
+      `La API respondió ${res.status} al pedir el producto ${id}`
+    );
+  }
 
   return res.json();
 }
