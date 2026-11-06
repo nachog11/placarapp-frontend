@@ -1,10 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-
 import { calcularTotalCarrito, type CartItemType } from "@/utils/cartUtils";
 
-// Re-exportamos el tipo para que los componentes puedan importarlo desde el contexto
 export type { CartItemType };
 
 interface CartContextType {
@@ -23,6 +21,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addToCart = (product: CartItemType) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
@@ -30,6 +29,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             : item
         );
       }
+
       return [...prev, product];
     });
   };
@@ -55,8 +55,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
+
   if (context === undefined) {
     throw new Error("useCart debe usarse dentro de un CartProvider");
   }
+
   return context;
 };
