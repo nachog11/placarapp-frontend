@@ -11,9 +11,11 @@ type Props = {
     stock: number;
     imagen?: string;
   };
+  // En las tarjetas del catálogo: botón más chico y centrado
+  compacto?: boolean;
 };
 
-export function AddToCartButton({ producto }: Props) {
+export function AddToCartButton({ producto, compacto = false }: Props) {
   const { cart, addToCart } = useCart();
   const [agregado, setAgregado] = useState(false);
 
@@ -34,14 +36,14 @@ export function AddToCartButton({ producto }: Props) {
   };
 
   return (
-    <div className="mt-6">
+    <div className={compacto ? "mt-3 text-center" : "mt-6"}>
       <button
         type="button"
         onClick={agregar}
         disabled={disponible <= 0}
-        className="rounded-full bg-oliva px-6 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+        className={`rounded-full bg-oliva text-white hover:opacity-90 disabled:opacity-50 ${compacto ? "px-5 py-1.5 text-xs" : "px-6 py-2.5 text-sm font-medium"}`}
       >
-        {disponible <= 0 ? "Ya tenés todo el stock en el carrito" : agregado ? "¡Agregado!" : "Agregar al carrito"}
+        {disponible <= 0 ? (compacto ? "Stock completo en el carrito" : "Ya tenés todo el stock en el carrito") : agregado ? "¡Agregado!" : "Agregar al carrito"}
       </button>
       {enCarrito > 0 && (
         <p role="status" className="mt-2 text-xs text-tinta/60">

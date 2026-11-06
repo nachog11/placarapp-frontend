@@ -6,7 +6,7 @@ NO incluye el layout/Navbar/home de Marcos F (se mergea aparte, ver abajo).
 ## Para correrlo
 1. Descomprimir y entrar a `placarapp-frontend/`
 2. `npm install`
-3. Crear `.env.local` con:  NEXT_PUBLIC_API_URL=http://localhost:8000   (SIN /api)
+3. Copiar `.env.example` a `.env.local` (NEXT_PUBLIC_API_URL=http://localhost:8000, SIN /api). En Vercel cargar la misma variable con la URL del back desplegado
 4. `npm run dev`  /  `npm test`  /  `npm run build`
 
 ## Al mergear con Marcos F
@@ -15,7 +15,8 @@ NO incluye el layout/Navbar/home de Marcos F (se mergea aparte, ver abajo).
 - `package-lock.json`: quedarse con uno y correr `npm install`.
 
 ## Datos para probar
-En /admin del back: un usuario con su Cliente vinculado, una Sucursal y productos con stock.
+En /admin del back: una Sucursal activa y productos con stock. Un usuario NO tiene Cliente automáticamente:
+puede crearlo desde el front en /perfil (primer ingreso al checkout) o desde /admin (Clientes > usuario vinculado).
 
 ## Qué cambió respecto a tu versión anterior
 - CartItemType unificado en utils/cartUtils.ts; CartContext sin fetch ni localStorage.
@@ -27,3 +28,10 @@ En /admin del back: un usuario con su Cliente vinculado, una Sucursal y producto
 ## Limitaciones conocidas del back
 - Devuelve los pedidos de todos los usuarios (el front filtra por pantalla).
 - Sin transacción ni control/descuento de stock.
+
+## Última revisión (correcciones de Vale)
+- Nueva página /perfil + Server Action `crearPerfil` (POST /api/clientes/clientes/): sin Cliente el checkout no puede crear pedidos.
+- Botón "Agregar al carrito" también en las tarjetas del catálogo (ProductCard), no solo en el detalle.
+- `getProductos` ahora recorre todas las páginas (el back pagina de a 10; antes el catálogo recibía {count, results} en vez de un array) y ya no manda `search=undefined`.
+- Sin `any` (api.ts, productos/page.tsx); `<img>` con eslint-disable justificado; layout con título y lang="es".
+- Verificado: `tsc --noEmit` sin errores, eslint sin errores (2 warnings de React Hook Form, inocuos), 13 tests OK, `next build` OK.

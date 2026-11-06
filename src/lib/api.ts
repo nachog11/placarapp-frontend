@@ -1,4 +1,5 @@
 import { getToken } from "@/lib/auth";
+import type { Categoria, Material, ProductoLista } from "@/lib/types";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -8,14 +9,15 @@ export const ENDPOINTS = {
   materiales: "/api/materiales/",
 };
 
-export async function list<T = any>(path: string): Promise<T[]> {
+export async function list<T = unknown>(path: string): Promise<T[]> {
   const token = await getToken();
   const headers: HeadersInit = token ? { Authorization: `Token ${token}` } : {};
 
   let page = 1;
   let all: T[] = [];
   while (true) {
-    const res = await fetch(`${API_URL}${path}?page=${page}`, { headers, cache: "no-store" });
+    const separador = path.includes("?") ? "&" : "?";
+    const res = await fetch(`${API_URL}${path}${separador}page=${page}`, { headers, cache: "no-store" });
     if (!res.ok) throw new Error(`La API respondió ${res.status} en ${path}`);
     const data = await res.json();
     if (Array.isArray(data)) return data;
@@ -25,12 +27,14 @@ export async function list<T = any>(path: string): Promise<T[]> {
   }
 }
 
-export async function getProductos(params?: { search?: string; categoria?: string; ordering?: string; activo?: string | boolean }) {
-  const query = new URLSearchParams(params as Record<string, string>).toString();
-  const url = `${API_URL}${ENDPOINTS.productos}${query ? `?${query}` : ""}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error("Error al obtener productos");
-  return res.json();
+// El back pagina de a 10 (PAGE_SIZE), así que se piden todas las páginas con list()
+export async function getProductos(params?: { search?: string; categoria?: string; ordering?: string; activo?: string | boolean }): Promise<ProductoLista[]> {
+  const query = new URLSearchParams();
+  for (const [clave, valor] of Object.entries(params ?? {})) {
+    if (valor !== undefined && valor !== "") query.set(clave, String(valor));
+  }
+  const qs = query.toString();
+  return list<ProductoLista>(`${ENDPOINTS.productos}${qs ? `?${qs}` : ""}`);
 }
 
 export async function getProducto(id: string) {
@@ -40,9 +44,9 @@ export async function getProducto(id: string) {
 }
 
 export async function getCategorias() {
-  return list(ENDPOINTS.categorias);
+  return list<Categoria>(ENDPOINTS.categorias);
 }
 
 export async function getMateriales() {
-  return list(ENDPOINTS.materiales);
+  return list<Material>(ENDPOINTS.materiales);
 }

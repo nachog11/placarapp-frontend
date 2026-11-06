@@ -34,7 +34,7 @@ async function Contenido({ filtros }: { filtros: Filtros }) {
 
   return (
     <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
-      {productos.map((producto: any) => (
+      {productos.map((producto) => (
         <ProductCard key={producto.id} producto={producto} />
       ))}
     </div>
