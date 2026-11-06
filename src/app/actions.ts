@@ -54,3 +54,82 @@ export async function login(
 export async function logout() {
   (await cookies()).delete("token");
 }
+
+import { revalidatePath } from "next/cache";
+import { ENDPOINTS } from "@/lib/api";
+
+export type ResultadoProducto = {
+  ok?: boolean;
+  error?: string;
+  errores?: Record<string, string[]>;
+  success?: boolean;
+};
+
+export async function crearProducto(valores: {
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+  precio: string;
+  stock: string;
+  categoria: string;
+  materiales: string[];
+  destacado: boolean;
+  activo: boolean;
+}): Promise<ResultadoProducto> {
+  const token = (await cookies()).get("token")?.value;
+
+  if (!token) {
+    return { error: "Tu sesión venció. Volvé a iniciar sesión." };
+  }
+
+  const res = await fetch(`${API_URL}${ENDPOINTS.productos}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
+    },
+    body: JSON.stringify(valores),
+    cache: "no-store",
+  }).catch(() => null);
+
+  if (!res) return { error: "No se pudo conectar con la API." };
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { error: "Error al crear el producto", errores: data };
+  }
+
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+
+  return { ok: true, success: true };
+}
+
+export async function borrarProducto(
+  id: number
+): Promise<ResultadoProducto> {
+  const token = (await cookies()).get("token")?.value;
+
+  if (!token) {
+    return { error: "Tu sesión venció. Volvé a iniciar sesión." };
+  }
+
+  const res = await fetch(`${API_URL}${ENDPOINTS.productos}${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Token ${token}`,
+    },
+    cache: "no-store",
+  }).catch(() => null);
+
+  if (!res) return { error: "No se pudo conectar con la API." };
+
+  if (!res.ok) {
+    return { error: "Error al borrar el producto." };
+  }
+
+  revalidatePath("/dashboard/productos");
+  revalidatePath("/productos");
+
+  return { ok: true, success: true };
+}

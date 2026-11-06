@@ -11,7 +11,6 @@ interface CartContextType {
   removeFromCart: (id: number) => void;
   clearCart: () => void;
   totalPrice: number;
-  enviarPedido: (datosCliente: any) => Promise<any>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -45,53 +44,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalPrice = calcularTotalCarrito(cart);
 
-  const enviarPedido = async (datosCliente: any) => {
-    const orderPayload = {
-      tipo_entrega: "ENVIO",
-      direccion_envio: {
-        calle: datosCliente.direccion,
-        numero: datosCliente.numero,
-        ciudad: datosCliente.ciudad,
-        codigo_postal: datosCliente.codigoPostal,
-      },
-      productos: cart.map((item) => ({
-        producto_id: item.id,
-        cantidad: item.cantidad,
-      })),
-    };
-
-    const response = await fetch("/api/pedidos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderPayload),
-    });
-
-    const resultado = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(
-        resultado.error ||
-        resultado.detail ||
-        "Error al procesar el pedido."
-      );
-    }
-
-    clearCart();
-    return resultado;
-  };
-
   return (
     <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        clearCart,
-        totalPrice,
-        enviarPedido,
-      }}
+      value={{ cart, addToCart, removeFromCart, clearCart, totalPrice }}
     >
       {children}
     </CartContext.Provider>
@@ -101,7 +56,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 export const useCart = () => {
   const context = useContext(CartContext);
 
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useCart debe usarse dentro de un CartProvider");
   }
 
