@@ -2,8 +2,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Cargando from "@/components/Cargando";
+import { AddToCartButton } from "@/components/carrito/AddToCartButton";
 import { formatearPrecio } from "@/components/ProductCard";
 import { getCategorias, getMateriales, getProducto } from "@/lib/api";
+import { extraerImagen } from "@/lib/imagen";
 
 async function Contenido({ id }: { id: string }) {
   const [producto, categorias, materiales] = await Promise.all([
@@ -44,6 +46,18 @@ async function Contenido({ id }: { id: string }) {
         <p className="mt-6 text-sm text-tinta/60">
           {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock por el momento"}
         </p>
+
+        {producto.stock > 0 && (
+          <AddToCartButton
+            producto={{
+              id: producto.id,
+              nombre: producto.nombre,
+              precio: producto.precio,
+              stock: producto.stock,
+              imagen: extraerImagen(producto.descripcion).imagen,
+            }}
+          />
+        )}
       </div>
     </div>
   );
