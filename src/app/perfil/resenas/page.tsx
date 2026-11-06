@@ -23,10 +23,7 @@ export default function ResenasPage() {
   useEffect(() => {
     if (loading) return;
 
-    if (!authenticated) {
-      setCargando(false);
-      return;
-    }
+    if (!authenticated) return;
 
     async function cargarResenas() {
       try {
@@ -53,7 +50,7 @@ export default function ResenasPage() {
     cargarResenas();
   }, [authenticated, loading]);
 
-  if (loading || cargando) {
+  if (loading || (authenticated && cargando)) {
     return <main className="p-8">Cargando reseñas...</main>;
   }
 

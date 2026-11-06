@@ -24,7 +24,30 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
 }
 
+interface AuthResponse {
+  authenticated: boolean;
+  cliente: Cliente | null;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+async function consultarSesion(): Promise<AuthResponse> {
+  const response = await fetch("/api/auth/me", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    return { authenticated: false, cliente: null };
+  }
+
+  const data = (await response.json()) as AuthResponse;
+
+  return {
+    authenticated: Boolean(data.authenticated),
+    cliente: data.cliente ?? null,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [cliente, setCliente] = useState<Cliente | null>(null);
@@ -33,19 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const response = await fetch("/api/auth/me", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        setAuthenticated(false);
-        setCliente(null);
-        return;
-      }
-
-      const data = await response.json();
-
+      const data = await consultarSesion();
       setAuthenticated(data.authenticated);
       setCliente(data.cliente);
     } catch (error) {
@@ -58,8 +69,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    let activo = true;
+
+    consultarSesion()
+      .then((data) => {
+        if (!activo) return;
+        setAuthenticated(data.authenticated);
+        setCliente(data.cliente);
+      })
+      .catch((error: unknown) => {
+        console.error("Error al consultar la sesión:", error);
+
+        if (!activo) return;
+        setAuthenticated(false);
+        setCliente(null);
+      })
+      .finally(() => {
+        if (activo) setLoading(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   return (
     <AuthContext.Provider
