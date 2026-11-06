@@ -1,0 +1,33 @@
+/*
+  Tema de PlacarApp: modo oscuro por clase y colores semánticos basados en la
+  paleta del proyecto (crema, arena, madera, cafe, oliva, tinta).
+  Se importa desde globals.css.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --card: #fbf8f3;
+  --muted: #4f5348; /* oliva */
+  --border: #e4dccf; /* arena */
+  --accent: #6b4a2f; /* cafe */
+  --accent-foreground: #f3ede4; /* crema */
+}
+
+/* ":root.dark" para ganarle a ":root" de globals.css */
+:root.dark {
+  --background: #1f1b17;
+  --foreground: #f3ede4;
+  --card: #2a2420;
+  --muted: #bdb4a6;
+  --border: #40372e;
+  --accent: #b98e63; /* madera */
+  --accent-foreground: #1f1b17;
+}
+
+@theme inline {
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}
