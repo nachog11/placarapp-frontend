@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { login } from "@/app/actions";
 
 const campo =
@@ -8,6 +9,14 @@ const campo =
 
 export default function LoginPage() {
   const [estado, accion, pendiente] = useActionState(login, null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (estado && "success" in estado && estado.success) {
+      router.push("/dashboard");
+      router.refresh();
+    }
+  }, [estado, router]);
 
   return (
     <div className="grid min-h-screen place-items-center bg-stone-100 px-5">
@@ -15,22 +24,42 @@ export default function LoginPage() {
         action={accion}
         className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
       >
-        <h1 className="text-2xl font-semibold text-slate-900">Iniciar sesión</h1>
-        <p className="mb-6 mt-1 text-sm text-slate-500">PlacarApp · Mueblería</p>
+        <h1 className="text-2xl font-semibold text-slate-900">
+          Iniciar sesión
+        </h1>
+        <p className="mb-6 mt-1 text-sm text-slate-500">
+          PlacarApp · Mueblería
+        </p>
 
         <div className="grid gap-4">
           <label className="grid gap-1.5 text-sm font-medium text-slate-700">
             Usuario
-            <input name="username" autoComplete="username" required autoFocus className={campo} />
+            <input
+              name="username"
+              autoComplete="username"
+              required
+              autoFocus
+              className={campo}
+            />
           </label>
+
           <label className="grid gap-1.5 text-sm font-medium text-slate-700">
             Contraseña
-            <input name="password" type="password" autoComplete="current-password" required className={campo} />
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              className={campo}
+            />
           </label>
         </div>
 
-        {estado?.error && (
-          <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+        {estado && "error" in estado && (
+          <p
+            role="alert"
+            className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800"
+          >
             {estado.error}
           </p>
         )}
