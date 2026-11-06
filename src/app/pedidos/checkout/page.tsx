@@ -15,6 +15,7 @@ const checkoutSchema = z.object({
   direccion: z.string().min(5, "Dirección obligatoria"),
   ciudad: z.string().min(2, "Ciudad obligatoria"),
   codigoPostal: z.string().min(2, "Código postal obligatorio"),
+  numero: z.string().min(1, "El número es obligatorio"),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -83,6 +84,14 @@ export default function CheckoutPage() {
             <label className="block text-sm text-gray-400 mb-1">Dirección de Entrega</label>
             <input {...register("direccion")} className="w-full bg-zinc-800 border border-zinc-700 rounded p-2 text-white" />
             {errors.direccion && <span className="text-red-500 text-xs">{errors.direccion.message}</span>}
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Número</label>
+            <input  {...register("numero")} className="w-full bg-zinc-800 border border-zinc-700 rounded p-2 text-white"
+            />{errors.numero && (
+              <span className="text-red-500 text-xs">{errors.numero.message}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
