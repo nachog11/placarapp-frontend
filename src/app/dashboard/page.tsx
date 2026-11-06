@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import Cargando from "@/components/Cargando";
+import { logout } from "@/app/actions";
 import { requireToken } from "@/lib/auth";
 
 async function Contenido() {
@@ -22,6 +23,15 @@ export default function DashboardPage() {
       <Suspense fallback={<Cargando />}>
         <Contenido />
       </Suspense>
+
+      <form action={logout} className="mt-6">
+        <button
+          type="submit"
+          className="rounded-full border border-border px-6 py-2 text-sm text-foreground hover:bg-card"
+        >
+          Cerrar sesión
+        </button>
+      </form>
     </main>
   );
 }
