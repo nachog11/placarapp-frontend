@@ -13,7 +13,7 @@ import type { Direccion, Sucursal } from "@/lib/pedidos";
 import { formatearMoneda } from "@/utils/cartUtils";
 
 const campo =
-  "w-full rounded-lg border border-madera/40 bg-white px-3 py-2.5 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
+  "w-full rounded-lg border border-madera/40 bg-card px-3 py-2.5 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
 
 function Campo({ etiqueta, error, children }: { etiqueta: string; error?: string; children: ReactNode }) {
   return (
@@ -105,7 +105,7 @@ export function CheckoutForm({ tienePerfil, sucursales, direcciones }: Props) {
     <div className="grid gap-8 md:grid-cols-2">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid h-fit gap-5 rounded-2xl border border-madera/30 bg-white p-6 shadow-sm"
+        className="grid h-fit gap-5 rounded-2xl border border-madera/30 bg-card p-6 shadow-sm"
       >
         <h2 className="text-xl font-light text-cafe">¿Cómo querés recibir tu pedido?</h2>
 
@@ -189,7 +189,7 @@ export function CheckoutForm({ tienePerfil, sucursales, direcciones }: Props) {
       </form>
 
       <div className="grid h-fit gap-6">
-        <div className="rounded-2xl border border-madera/30 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-madera/30 bg-card p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-light text-cafe">Tu carrito</h2>
           <ul className="grid gap-3">
             {cart.map((item) => (

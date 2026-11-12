@@ -11,7 +11,7 @@ export function OrderSummary({ subtotal }: OrderSummaryProps) {
   const total = subtotal + envio;
 
   return (
-    <div className="rounded-2xl border border-madera/30 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-madera/30 bg-card p-6 shadow-sm">
       <h2 className="mb-4 text-xl font-light text-cafe">Resumen del pedido</h2>
       <div className="space-y-2 text-tinta/80">
         <div className="flex justify-between">

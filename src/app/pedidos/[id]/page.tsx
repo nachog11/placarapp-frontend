@@ -42,7 +42,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
         <span className="rounded-full bg-arena px-3 py-1 text-sm text-cafe">{pedido.estado}</span>
       </div>
 
-      <section className="mt-8 rounded-2xl border border-madera/30 bg-white p-6 shadow-sm">
+      <section className="mt-8 rounded-2xl border border-madera/30 bg-card p-6 shadow-sm">
         <h2 className="mb-3 text-lg font-light text-cafe">Productos</h2>
         <ul className="grid gap-2">
           {pedido.detalles_pedido.map((d, i) => (
@@ -63,7 +63,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
         </p>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-madera/30 bg-white p-6 text-sm text-tinta shadow-sm">
+      <section className="mt-6 rounded-2xl border border-madera/30 bg-card p-6 text-sm text-tinta shadow-sm">
         <h2 className="mb-3 text-lg font-light text-cafe">Entrega</h2>
         {pedido.tipo_entrega === "RETIRO" ? (
           <p>

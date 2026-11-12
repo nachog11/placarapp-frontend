@@ -11,7 +11,7 @@ import {
 } from "@/lib/schemas/loginSchema";
 
 const campo =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-amber-700 focus:outline-2 focus:outline-amber-700/30";
+  "w-full rounded-lg border border-madera/40 bg-background px-4 py-3 text-base text-foreground placeholder:text-tinta/40 focus:border-madera focus:outline-2 focus:outline-madera/30";
 
 export default function LoginForm() {
   const [errorServidor, setErrorServidor] = useState("");
@@ -30,45 +30,41 @@ export default function LoginForm() {
   });
 
   async function onSubmit(datos: LoginFormValues) {
-  setErrorServidor("");
+    setErrorServidor("");
 
-  const formData = new FormData();
-  formData.append("username", datos.username);
-  formData.append("password", datos.password);
+    const formData = new FormData();
+    formData.append("username", datos.username);
+    formData.append("password", datos.password);
 
-  try {
-    const resultado = await login(null, formData);
+    try {
+      const resultado = await login(null, formData);
 
-    if (resultado && "error" in resultado) {
-      setErrorServidor(resultado.error);
-      setError("root", { message: resultado.error });
-      return;
+      if (resultado && "error" in resultado) {
+        setErrorServidor(resultado.error);
+        setError("root", { message: resultado.error });
+        return;
+      }
+
+      if (resultado && "success" in resultado && resultado.success) {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setErrorServidor("Ocurrió un error al iniciar sesión.");
     }
-
-    if (resultado && "success" in resultado && resultado.success) {
-      router.push("/dashboard");
-      router.refresh();
-    }
-  } catch {
-    setErrorServidor("Ocurrió un error al iniciar sesión.");
   }
-}
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
+      className="w-full max-w-md rounded-2xl border border-madera/30 bg-card p-10 shadow-sm"
     >
-      <h1 className="text-2xl font-semibold text-slate-900">
-        Iniciar sesión
-      </h1>
+      <h1 className="text-3xl font-light text-cafe">Iniciar sesión</h1>
 
-      <p className="mb-6 mt-1 text-sm text-slate-500">
-        PlacarApp · Mueblería
-      </p>
+      <p className="mb-8 mt-2 text-sm text-tinta/60">PlacarApp · Mueblería</p>
 
-      <div className="grid gap-4">
-        <label className="grid gap-1.5 text-sm font-medium text-slate-700">
+      <div className="grid gap-5">
+        <label className="grid gap-1.5 text-sm font-medium text-tinta">
           Usuario
           <input
             {...register("username")}
@@ -77,13 +73,13 @@ export default function LoginForm() {
             className={campo}
           />
           {errors.username && (
-            <span className="text-xs text-red-600">
+            <span className="text-xs font-normal text-red-700 dark:text-red-400">
               {errors.username.message}
             </span>
           )}
         </label>
 
-        <label className="grid gap-1.5 text-sm font-medium text-slate-700">
+        <label className="grid gap-1.5 text-sm font-medium text-tinta">
           Contraseña
           <input
             {...register("password")}
@@ -92,7 +88,7 @@ export default function LoginForm() {
             className={campo}
           />
           {errors.password && (
-            <span className="text-xs text-red-600">
+            <span className="text-xs font-normal text-red-700 dark:text-red-400">
               {errors.password.message}
             </span>
           )}
@@ -102,7 +98,7 @@ export default function LoginForm() {
       {errorServidor && (
         <p
           role="alert"
-          className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="mt-5 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800"
         >
           {errorServidor}
         </p>
@@ -111,7 +107,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 w-full rounded-lg bg-amber-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-900 disabled:opacity-60"
+        className="mt-8 w-full rounded-full bg-oliva px-6 py-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
       >
         {isSubmitting ? "Entrando..." : "Entrar"}
       </button>

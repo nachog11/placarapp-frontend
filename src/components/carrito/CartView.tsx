@@ -29,7 +29,7 @@ export function CartView() {
       <h1 className="mb-8 text-3xl font-light text-cafe">Carrito de compras</h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="rounded-2xl border border-madera/30 bg-white p-6 shadow-sm lg:col-span-2">
+        <div className="rounded-2xl border border-madera/30 bg-card p-6 shadow-sm lg:col-span-2">
           <div className="mb-2 flex items-center justify-between border-b border-madera/30 pb-2">
             <span className="font-medium text-tinta">Productos</span>
             <button onClick={clearCart} className="text-sm text-red-700 hover:underline">

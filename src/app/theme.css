@@ -13,7 +13,6 @@
   --accent-foreground: #f3ede4; /* crema */
 }
 
-/* ":root.dark" para ganarle a ":root" de globals.css */
 :root.dark {
   --background: #1f1b17;
   --foreground: #f3ede4;
@@ -22,6 +21,13 @@
   --border: #40372e;
   --accent: #b98e63; /* madera */
   --accent-foreground: #1f1b17;
+
+  /* colores de la paleta, versión oscura */
+  --color-tinta: #f3ede4;
+  --color-cafe: #d9b88f;
+  --color-arena: #3a322a;
+  --color-oliva: #6b7560;
+  --color-crema: #1f1b17;
 }
 
 @theme inline {

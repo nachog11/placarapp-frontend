@@ -42,7 +42,7 @@ export default function PerfilPage() {
     <main className="mx-auto max-w-2xl p-8">
       <h1 className="mb-6 text-2xl font-semibold">Mi perfil</h1>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-card p-6 shadow-sm">
         <div className="grid gap-4">
           <div>
             <p className="text-sm text-slate-500">Nombre y apellido</p>

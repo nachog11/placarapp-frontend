@@ -92,7 +92,7 @@ export default function ResenasPage() {
         {resenas.map((resena) => (
           <article
             key={resena.id}
-            className="rounded-xl border border-slate-200 bg-white p-5"
+            className="rounded-xl border border-slate-200 bg-card p-5"
           >
             <h2 className="font-semibold">{resena.producto_nombre}</h2>
 

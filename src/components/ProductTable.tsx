@@ -13,7 +13,7 @@ export default function ProductTable({ productos }: { productos: ProductoLista[]
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-madera/30 bg-white">
+    <div className="overflow-x-auto rounded-2xl border border-madera/30 bg-card">
       <table className="w-full text-left text-sm">
         <thead className="bg-arena/60 text-xs uppercase tracking-wide text-tinta/60">
           <tr>

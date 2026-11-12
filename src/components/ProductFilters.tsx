@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Categoria } from "@/lib/types";
 
 const campo =
-  "rounded-full border border-madera/40 bg-white px-4 py-2 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
+  "rounded-full border border-madera/40 bg-card px-4 py-2 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
 
 export default function ProductFilters({ categorias }: { categorias: Categoria[] }) {
   const router = useRouter();

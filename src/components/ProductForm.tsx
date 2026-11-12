@@ -9,7 +9,7 @@ import type { ResultadoProducto } from "@/app/actions";
 import type { Categoria, Material } from "@/lib/types";
 
 const campo =
-  "w-full rounded-lg border border-madera/40 bg-white px-3 py-2.5 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
+  "w-full rounded-lg border border-madera/40 bg-card px-3 py-2.5 text-sm text-tinta focus:border-madera focus:outline-2 focus:outline-madera/30";
 
 const VALORES_VACIOS: ProductoFormValues = {
   nombre: "",
@@ -123,7 +123,7 @@ export default function ProductForm({
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      className="grid max-w-2xl gap-5 rounded-2xl border border-madera/30 bg-white p-8"
+      className="grid max-w-2xl gap-5 rounded-2xl border border-madera/30 bg-card p-8"
     >
       <Campo etiqueta="Nombre" error={errors.nombre?.message}>
         <input {...register("nombre")} className={campo} />

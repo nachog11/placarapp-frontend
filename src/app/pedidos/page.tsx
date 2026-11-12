@@ -30,7 +30,7 @@ export default async function PedidosPage() {
             <li key={p.id}>
               <Link
                 href={`/pedidos/${p.id}`}
-                className="flex items-center justify-between rounded-2xl border border-madera/30 bg-white p-5 shadow-sm transition hover:border-madera"
+                className="flex items-center justify-between rounded-2xl border border-madera/30 bg-card p-5 shadow-sm transition hover:border-madera"
               >
                 <div>
                   <p className="font-medium text-tinta">Pedido #{p.id}</p>
