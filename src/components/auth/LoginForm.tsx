@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -114,6 +116,16 @@ export default function LoginForm() {
       >
         {isSubmitting ? "Entrando..." : "Entrar"}
       </button>
+
+      <p className="mt-6 text-center text-sm text-tinta/70">
+        ¿No tenés una cuenta?{" "}
+        <Link
+          href="/registro"
+          className="font-semibold text-accent underline"
+        >
+          Registrate
+        </Link>
+      </p>
     </form>
   );
 }

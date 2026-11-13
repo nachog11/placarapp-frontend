@@ -187,3 +187,58 @@ export async function editarProducto(
     valores
   );
 }
+
+export type DatosRegistroCliente = {
+  username: string;
+  email: string;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  password: string;
+  password_confirm: string;
+};
+
+export type ResultadoRegistro =
+  | { success: true; message: string }
+  | { error: string };
+
+export async function registrarCliente(
+  datos: DatosRegistroCliente
+): Promise<ResultadoRegistro> {
+  if (!API_URL) {
+    return { error: "La API no está configurada." };
+  }
+
+  const res = await fetch(`${API_URL}/api/clientes/registro/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+    cache: "no-store",
+  }).catch(() => null);
+
+  if (!res) {
+    return { error: "No se pudo conectar con la API." };
+  }
+
+  const respuesta = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    if (res.status === 400 && respuesta && typeof respuesta === "object") {
+      const mensajes = Object.entries(respuesta)
+        .map(([campo, valor]) => {
+          const texto = Array.isArray(valor) ? valor.join(" ") : String(valor);
+          return `${campo}: ${texto}`;
+        })
+        .join(" ");
+
+      return { error: mensajes || "Revisá los datos ingresados." };
+    }
+
+    return { error: "No se pudo crear la cuenta. Intentá nuevamente." };
+  }
+
+  return {
+    success: true,
+    message: respuesta?.mensaje ?? "Cuenta creada correctamente.",
+  };
+}
