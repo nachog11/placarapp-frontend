@@ -38,25 +38,33 @@ export async function login(
     return { error: "La API respondió con un error. Intenta de nuevo." };
   }
 
-  const { token } = await res.json();
+  const { token, is_staff } = await res.json();
 
   if (!token) {
     return { error: "La API no devolvió un token válido." };
   }
 
-  (await cookies()).set("token", token, {
+  const opcionesCookie = {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 2,
-  });
+  };
+
+  const jar = await cookies();
+  jar.set("token", token, opcionesCookie);
+  jar.set("usuario", String(formData.get("username") ?? ""), opcionesCookie);
+  jar.set("staff", is_staff ? "1" : "0", opcionesCookie);
 
   return { success: true };
 }
 
 export async function logout() {
-  (await cookies()).delete("token");
+  const jar = await cookies();
+  jar.delete("token");
+  jar.delete("usuario");
+  jar.delete("staff");
 }
 
 async function llamar(

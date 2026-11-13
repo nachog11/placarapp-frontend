@@ -10,3 +10,11 @@ export async function requireToken() {
   if (!token) redirect("/login");
   return token;
 }
+
+// Solo el personal (is_staff) entra al panel. El back igual lo exige al escribir.
+export async function requireStaff() {
+  const token = await requireToken();
+  const esStaff = (await cookies()).get("staff")?.value === "1";
+  if (!esStaff) redirect("/");
+  return token;
+}

@@ -18,6 +18,8 @@ export interface Cliente {
 }
 
 interface AuthContextType {
+  usuario: string | null;
+  staff: boolean;
   cliente: Cliente | null;
   authenticated: boolean;
   loading: boolean;
@@ -26,10 +28,19 @@ interface AuthContextType {
 
 interface AuthResponse {
   authenticated: boolean;
+  usuario: string | null;
+  staff: boolean;
   cliente: Cliente | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const SIN_SESION: AuthResponse = {
+  authenticated: false,
+  usuario: null,
+  staff: false,
+  cliente: null,
+};
 
 async function consultarSesion(): Promise<AuthResponse> {
   const response = await fetch("/api/auth/me", {
@@ -38,31 +49,29 @@ async function consultarSesion(): Promise<AuthResponse> {
   });
 
   if (!response.ok) {
-    return { authenticated: false, cliente: null };
+    return SIN_SESION;
   }
 
-  const data = (await response.json()) as AuthResponse;
+  const data = (await response.json()) as Partial<AuthResponse>;
 
   return {
     authenticated: Boolean(data.authenticated),
+    usuario: data.usuario ?? null,
+    staff: Boolean(data.staff),
     cliente: data.cliente ?? null,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [cliente, setCliente] = useState<Cliente | null>(null);
-  const [authenticated, setAuthenticated] = useState(false);
+  const [sesion, setSesion] = useState<AuthResponse>(SIN_SESION);
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
     try {
-      const data = await consultarSesion();
-      setAuthenticated(data.authenticated);
-      setCliente(data.cliente);
+      setSesion(await consultarSesion());
     } catch (error) {
       console.error("Error al consultar la sesión:", error);
-      setAuthenticated(false);
-      setCliente(null);
+      setSesion(SIN_SESION);
     } finally {
       setLoading(false);
     }
@@ -73,16 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     consultarSesion()
       .then((data) => {
-        if (!activo) return;
-        setAuthenticated(data.authenticated);
-        setCliente(data.cliente);
+        if (activo) setSesion(data);
       })
       .catch((error: unknown) => {
         console.error("Error al consultar la sesión:", error);
-
-        if (!activo) return;
-        setAuthenticated(false);
-        setCliente(null);
+        if (activo) setSesion(SIN_SESION);
       })
       .finally(() => {
         if (activo) setLoading(false);
@@ -96,8 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        cliente,
-        authenticated,
+        usuario: sesion.usuario,
+        staff: sesion.staff,
+        cliente: sesion.cliente,
+        authenticated: sesion.authenticated,
         loading,
         refreshUser,
       }}

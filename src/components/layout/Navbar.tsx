@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { logout } from "@/app/actions";
 import { buttonStyles } from "@/components/ui/Button";
+import { useAuth } from "@/context/auth/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 
 const links = [
@@ -14,14 +16,13 @@ const links = [
   { href: "/carrito", label: "Carrito" },
 ];
 
-/**
- * Client Component: necesita estado (menú móvil abierto/cerrado) y el hook
- * usePathname para marcar el link activo. Ninguna de las dos cosas existe en
- * un Server Component.
- */
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { authenticated, loading, usuario, cliente, staff, refreshUser } = useAuth();
+
+  const nombre = usuario ?? cliente?.nombre ?? "Mi cuenta";
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -30,6 +31,14 @@ export default function Navbar() {
     `rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-accent ${
       isActive(href) ? "text-accent" : "text-foreground"
     }`;
+
+  async function cerrarSesion() {
+    setOpen(false);
+    await logout();
+    await refreshUser();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -58,10 +67,29 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <div className="hidden md:block">
-            <Link href="/login" className={buttonStyles({ size: "sm" })}>
-              Ingresar
-            </Link>
+          <div className="hidden items-center gap-3 md:flex">
+            {loading ? null : authenticated ? (
+              <>
+                <Link
+                  href={staff ? "/dashboard" : "/perfil"}
+                  title="Ir al panel"
+                  className="max-w-[10rem] truncate text-sm font-medium text-accent hover:underline"
+                >
+                  {nombre}
+                </Link>
+                <button
+                  type="button"
+                  onClick={cerrarSesion}
+                  className={buttonStyles({ size: "sm", variant: "outline" })}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className={buttonStyles({ size: "sm" })}>
+                Ingresar
+              </Link>
+            )}
           </div>
 
           {/* Botón del menú móvil */}
@@ -113,13 +141,32 @@ export default function Navbar() {
               </li>
             ))}
             <li className="pt-2">
-              <Link
-                href="/login"
-                className={buttonStyles({ className: "w-full" })}
-                onClick={() => setOpen(false)}
-              >
-                Ingresar
-              </Link>
+              {loading ? null : authenticated ? (
+                <div className="grid gap-2">
+                  <Link
+                    href={staff ? "/dashboard" : "/perfil"}
+                    className="px-3 text-sm font-medium text-accent"
+                    onClick={() => setOpen(false)}
+                  >
+                    {nombre}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={cerrarSesion}
+                    className={buttonStyles({ variant: "outline", className: "w-full" })}
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className={buttonStyles({ className: "w-full" })}
+                  onClick={() => setOpen(false)}
+                >
+                  Ingresar
+                </Link>
+              )}
             </li>
           </ul>
         </nav>

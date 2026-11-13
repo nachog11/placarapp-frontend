@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/actions";
+import { useAuth } from "@/context/auth/AuthContext";
 import {
   loginSchema,
   type LoginFormValues,
@@ -16,6 +17,7 @@ const campo =
 export default function LoginForm() {
   const [errorServidor, setErrorServidor] = useState("");
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const {
     register,
     handleSubmit,
@@ -46,6 +48,7 @@ export default function LoginForm() {
       }
 
       if (resultado && "success" in resultado && resultado.success) {
+        await refreshUser();
         router.push("/dashboard");
         router.refresh();
       }
